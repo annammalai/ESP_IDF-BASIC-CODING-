@@ -1,0 +1,32 @@
+#include <stdio.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "driver/gpio.h"
+
+#define LED_GPIO GPIO_NUM_2    // LED connected to GPIO2 (D2)
+#define BUTTON_GPIO GPIO_NUM_5 // Button connected to GPIO5 (D5)
+
+void app_main(void) {
+    // Reset pins before using them
+    gpio_reset_pin(LED_GPIO);
+    gpio_reset_pin(BUTTON_GPIO);
+
+    // Set LED as output
+    gpio_set_direction(LED_GPIO, GPIO_MODE_OUTPUT);
+    
+    // Set button as input with pull-up resistor
+    gpio_set_direction(BUTTON_GPIO, GPIO_MODE_INPUT);
+    gpio_pullup_en(BUTTON_GPIO);  // Enable internal pull-up
+
+    while (1) {
+        int button_state = gpio_get_level(BUTTON_GPIO); // Read button state
+
+        if (button_state == 0) {  // Button Pressed (LOW)
+            gpio_set_level(LED_GPIO, 1);  // Turn LED ON
+        } else { 
+            gpio_set_level(LED_GPIO, 0);  // Turn LED OFF
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(10));  // Small delay to avoid high CPU usage
+    }
+}
